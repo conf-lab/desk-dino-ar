@@ -45,6 +45,13 @@ export function searchDinos(query: string, dinos: Dino[] = DINOS): Dino[] {
     .map((x) => x.dino);
 }
 
-export type SizeMode = 'desk' | 'real';
+export type SceneMode = 'meadow' | 'desk' | 'real';
 
-export const modelUrl = (id: string, mode: SizeMode) => `./models/${id}-${mode}.glb`;
+// Vite가 내용에 따라 파일 이름을 바꾸므로, 새로 배포하면 예전 파일이 캐시에서 나오지 않는다.
+const MODELS = import.meta.glob<string>('./models/*.glb', { query: '?url', import: 'default', eager: true });
+
+export function modelUrl(id: string, mode: SceneMode): string {
+  const url = MODELS[`./models/${id}-${mode}.glb`];
+  if (!url) throw new Error(`3D 모델이 없습니다: ${id}-${mode}`);
+  return url;
+}

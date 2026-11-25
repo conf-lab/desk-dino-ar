@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const [src, id, realArg, outDir = 'public/models'] = process.argv.slice(2);
+const [src, id, realArg, outDir = 'src/models'] = process.argv.slice(2);
 const realLength = Number(realArg);
 if (!src || !/^[a-z0-9-]+$/.test(id ?? '') || !(realLength > 0)) {
   console.error('사용: node scripts/prepare-model.mjs <원본.glb> <id> <실제 길이(m)> [출력 폴더]');

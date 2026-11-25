@@ -22,6 +22,13 @@ describe('searchDinos', () => {
   });
 });
 
-it('크기별로 다른 파일을 쓴다', () => {
-  expect(modelUrl('trex', 'desk')).not.toBe(modelUrl('trex', 'real'));
+it('모든 공룡에 장면별 3D 파일이 있고 서로 다르다', () => {
+  for (const { id } of DINOS) {
+    const urls = (['meadow', 'desk', 'real'] as const).map((m) => modelUrl(id, m));
+    expect(new Set(urls).size).toBe(3);
+  }
+});
+
+it('없는 모델은 오류로 알린다', () => {
+  expect(() => modelUrl('none', 'desk')).toThrow();
 });

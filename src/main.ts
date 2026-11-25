@@ -1,7 +1,7 @@
 import '@google/model-viewer';
 import type { ModelViewerElement } from '@google/model-viewer';
 import './style.css';
-import { DINOS, modelUrl, searchDinos, type Dino, type SizeMode } from './dinos';
+import { DINOS, modelUrl, searchDinos, type Dino, type SceneMode } from './dinos';
 
 const $ = <T extends Element>(selector: string): T => {
   const el = document.querySelector<T>(selector);
@@ -18,8 +18,8 @@ const title = $<HTMLElement>('#name');
 const viewer = $<ModelViewerElement>('#viewer');
 const arButton = $<HTMLButtonElement>('#ar');
 const arNote = $<HTMLElement>('#ar-note');
-const sizes = $<HTMLFieldSetElement>('#sizes');
-const sizeInputs = document.querySelectorAll<HTMLInputElement>('input[name="size"]');
+const scenes = $<HTMLFieldSetElement>('#scenes');
+const sceneInputs = document.querySelectorAll<HTMLInputElement>('input[name="scene"]');
 
 // 움직임을 줄이도록 설정한 사람에게는 웹 화면에서 자동 재생하지 않는다.
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -33,7 +33,7 @@ reducedMotion.addEventListener('change', applyMotion);
 applyMotion();
 
 let current: Dino | null = null;
-let size: SizeMode = 'desk';
+let scene: SceneMode = 'meadow';
 let loading = false;
 let noteTimer = 0;
 const failures = new Map<string, number>();
@@ -45,7 +45,7 @@ let focusBack: HTMLElement | null = null;
 function setLoading(on: boolean) {
   loading = on;
   submit.disabled = on;
-  sizes.disabled = on;
+  scenes.disabled = on;
   arButton.hidden = on;
   // 잠그는 동안 라디오가 포커스를 잃으므로, 다른 곳으로 옮기지 않았을 때만 되돌린다.
   if (!on) {
@@ -57,7 +57,7 @@ function setLoading(on: boolean) {
 function loadModel() {
   if (!current || loading) return;
   // model-viewer는 실패한 주소도 캐시하므로, 실패한 뒤에는 주소를 바꿔 새로 받는다.
-  const base = modelUrl(current.id, size);
+  const base = modelUrl(current.id, scene);
   const retry = failures.get(base);
   const url = retry ? `${base}?retry=${retry}` : base;
   if (viewer.getAttribute('src') === url) return;
@@ -68,7 +68,9 @@ function loadModel() {
   message.textContent = '공룡을 불러오는 중…';
   viewer.alt = `${current.ko} 3D 모델`;
   // 실제 크기는 그대로 봐야 하므로 손가락 확대를 막는다.
-  viewer.setAttribute('ar-scale', size === 'real' ? 'fixed' : 'auto');
+  viewer.setAttribute('ar-scale', scene === 'real' ? 'fixed' : 'auto');
+  // 초원은 위에서 내려다봐야 한눈에 보인다.
+  viewer.setAttribute('camera-orbit', scene === 'meadow' ? '15deg 62deg 88%' : '50deg 80deg auto');
   viewer.setAttribute('src', url);
 }
 
@@ -101,9 +103,9 @@ form.addEventListener('submit', (e) => {
   message.textContent = `'${q}'은(는) 아직 준비하지 못했어요. 지금 볼 수 있는 공룡: ${names}`;
 });
 
-sizeInputs.forEach((radio) =>
+sceneInputs.forEach((radio) =>
   radio.addEventListener('change', () => {
-    size = radio.value as SizeMode;
+    scene = radio.value as SceneMode;
     focusBack = radio;
     loadModel();
   }),

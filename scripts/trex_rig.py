@@ -1,5 +1,5 @@
 # 정지한 티라노 모델에 뼈대와 8초 반복 동작(숨쉬기, 고개, 꼬리)을 넣는다.
-# 사용: blender -b --factory-startup -P scripts/rig-trex.py -- <정지 모델.glb> <출력 폴더> [미리보기 폴더]
+# 사용: blender -b --factory-startup -P scripts/trex_rig.py -- <정지 모델.glb> <출력 폴더> [미리보기 폴더]
 # 관절 좌표는 12m 모델 기준(Blender: 앞 -Y, 위 +Z)으로 잰 값이다.
 import math
 import os
@@ -8,10 +8,16 @@ import sys
 import bpy
 from mathutils import Vector
 
-args = sys.argv[sys.argv.index('--') + 1:]
-src, out_dir = os.path.abspath(args[0]), os.path.abspath(args[1])
-preview = os.path.abspath(args[2]) if len(args) > 2 else None
-os.makedirs(out_dir, exist_ok=True)
+
+def parse_args():
+    args = sys.argv[sys.argv.index('--') + 1:]
+    src, out_dir = os.path.abspath(args[0]), os.path.abspath(args[1])
+    preview = os.path.abspath(args[2]) if len(args) > 2 else None
+    os.makedirs(out_dir, exist_ok=True)
+    if preview:
+        os.makedirs(preview, exist_ok=True)
+    return src, out_dir, preview
+
 
 FPS, SECONDS = 24, 8
 FRAMES = FPS * SECONDS
@@ -36,13 +42,13 @@ for s, n in ((1, 'L'), (-1, 'R')):
     BONES[f'shin.{n}'] = (knee, ankle, f'thigh.{n}', True)
     BONES[f'foot.{n}'] = (ankle, ball, f'shin.{n}', True)
     BONES[f'toe.{n}'] = (ball, toe, f'foot.{n}', True)
-    BONES[f'ik.{n}'] = (ankle, ball, 'root', False)
+    BONES[f'ik.{n}'] = (ankle, ball, None, False)
     shoulder, elbow, hand = (0.5 * s, -3.15, 2.6), (0.6 * s, -3.15, 2.28), (0.42 * s, -3.3, 1.92)
     BONES[f'arm.{n}'] = (shoulder, elbow, 'chest', True)
     BONES[f'forearm.{n}'] = (elbow, hand, f'arm.{n}', True)
 
 
-def build(scale):
+def build(src, scale):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=src)
     mesh = next(o for o in bpy.data.objects if o.type == 'MESH')
@@ -188,7 +194,7 @@ def export(path):
     )
 
 
-def render(mesh):
+def render(preview):
     sc = bpy.context.scene
     sc.render.engine = 'BLENDER_WORKBENCH'
     sc.display.shading.color_type = 'TEXTURE'
@@ -208,18 +214,23 @@ def render(mesh):
         bpy.data.objects.remove(cam)
 
 
-for mode, scale in (('desk', 0.3 / 12), ('real', 1.0)):
-    mesh, arm = build(scale)
-    animate(arm, scale)
-    check(mesh, scale, f'{mode} 내보내기 전')
-    if preview and mode == 'real':
-        os.makedirs(preview, exist_ok=True)
-        render(mesh)
-    path = os.path.join(out_dir, f'trex-{mode}.glb')
-    export(path)
-    # 내보낸 파일을 다시 불러와 실제 배포본을 검사한다.
-    bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.context.scene.render.fps = FPS
-    bpy.ops.import_scene.gltf(filepath=path)
-    skinned = [o for o in bpy.data.objects if o.type == 'MESH' and any(m.type == 'ARMATURE' for m in o.modifiers)]
-    check(skinned[0], scale, f'{mode} 배포본')
+def main():
+    src, out_dir, preview = parse_args()
+    for mode, scale in (('desk', 0.3 / 12), ('real', 1.0)):
+        mesh, arm = build(src, scale)
+        animate(arm, scale)
+        check(mesh, scale, f'{mode} 내보내기 전')
+        if preview and mode == 'real':
+            render(preview)
+        path = os.path.join(out_dir, f'trex-{mode}.glb')
+        export(path)
+        # 내보낸 파일을 다시 불러와 실제 배포본을 검사한다.
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.context.scene.render.fps = FPS
+        bpy.ops.import_scene.gltf(filepath=path)
+        skinned = [o for o in bpy.data.objects if o.type == 'MESH' and any(m.type == 'ARMATURE' for m in o.modifiers)]
+        check(skinned[0], scale, f'{mode} 배포본')
+
+
+if __name__ == '__main__':
+    main()

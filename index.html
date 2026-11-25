@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="공룡 이름을 검색하면 내 책상 위에 3D로 불러옵니다." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦖</text></svg>" />
+    <title>책상 위 공룡</title>
+    <script type="module" crossorigin src="./assets/index-Bfud8WOw.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D0pW1_Au.css">
+  </head>
+  <body>
+    <main>
+      <h1>책상 위 공룡</h1>
+      <form id="search" role="search">
+        <label for="q" class="sr-only">공룡 이름</label>
+        <input id="q" type="search" placeholder="공룡 이름 (예: 티라노)" autocomplete="off" enterkeyhint="search" />
+        <button type="submit">찾기</button>
+      </form>
+      <p id="message" role="status"></p>
+
+      <section id="stage" hidden>
+        <header>
+          <h2 id="name" tabindex="-1"></h2>
+          <p id="latin" lang="la"></p>
+        </header>
+
+        <model-viewer
+          id="viewer"
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          ar-placement="floor"
+          camera-controls
+          camera-orbit="50deg 80deg auto"
+          interaction-prompt="none"
+          touch-action="pan-y"
+          shadow-intensity="1"
+          tone-mapping="aces"
+        >
+          <button slot="ar-button" id="ar" type="button">내 공간에서 보기</button>
+        </model-viewer>
+        <p id="ar-note" hidden>
+          이 기기나 브라우저에서는 AR을 쓸 수 없어요. 휴대폰의 Chrome(안드로이드)이나 Safari(아이폰)로 열어 보세요.
+        </p>
+
+        <fieldset id="sizes">
+          <legend>AR 크기</legend>
+          <label><input type="radio" name="size" value="desk" checked /> 책상 크기 (30cm)</label>
+          <label><input type="radio" name="size" value="real" /> 실제 크기</label>
+        </fieldset>
+
+        <dl>
+          <div><dt>몸길이</dt><dd id="length"></dd></div>
+          <div><dt>시대</dt><dd id="period"></dd></div>
+          <div><dt>먹이</dt><dd id="diet"></dd></div>
+        </dl>
+        <p id="fact"></p>
+      </section>
+    </main>
+  </body>
+</html>

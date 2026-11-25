@@ -79,13 +79,13 @@ export class Actor {
 
   /** center를 중심으로 도는 길에 놓는다. start는 중심에서 시작점을 향하는 방향(라디안). */
   place(center: THREE.Vector3, length: number, radius: number, start: number, altitude = 0) {
-    this.center.copy(center);
     this.angle = start;
-    this.resize(length, radius, altitude);
+    this.resize(center, length, radius, altitude);
   }
 
   /** 길을 가던 자리를 지키며 크기만 바꾼다. */
-  resize(length: number, radius: number, altitude = 0) {
+  resize(center: THREE.Vector3, length: number, radius: number, altitude = 0) {
+    this.center.copy(center);
     this.speed *= length / this.length;
     this.length = length;
     this.radius = radius;

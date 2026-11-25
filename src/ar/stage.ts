@@ -22,6 +22,24 @@ export function eraPath(dino: Dino): EraPath & { altitude: number } {
   return { center: new THREE.Vector3(0, 0, -(radius + clear + gap)), radius, clear, flies: !!dino.flies, altitude: dino.flies ? 5 : 0 };
 }
 
+/**
+ * 현실 모드에서 동물이 도는 길. 고른 자리(anchor)에서 옆모습으로 출발해 보는 사람에게서 먼 쪽으로 돈다.
+ * 큰 동물이 보는 사람과 겹치지 않도록 필요하면 자리를 앞으로 민다.
+ */
+export function realPath(dino: Dino, anchor: THREE.Vector3, camera: THREE.Vector3, length: number, floorY: number | null) {
+  const away = new THREE.Vector3(anchor.x - camera.x, 0, anchor.z - camera.z);
+  const distance = away.length();
+  if (distance < 0.05) away.set(0, 0, -1);
+  else away.divideScalar(distance);
+  const nearest = length < 0.5 ? 0.3 : length * 0.9 + 1;
+  const d = Math.max(distance, nearest);
+  const radius = length * (dino.flies ? 1.3 : 0.7);
+  // 책상보다 큰 동물은 책상 높이가 아니라 바닥에 세운다.
+  const y = length >= 1 && floorY !== null ? Math.min(anchor.y, floorY) : anchor.y;
+  const center = new THREE.Vector3(camera.x, y, camera.z).addScaledVector(away, d + radius);
+  return { center, radius, start: Math.atan2(-away.z, -away.x), altitude: dino.flies ? length * 0.8 : 0 };
+}
+
 /** AR 세션과 상관없는 3D 장면. 시험용 화면에서도 같은 것을 쓴다. */
 export class Stage {
   readonly scene = new THREE.Scene();
@@ -33,7 +51,8 @@ export class Stage {
   private eraGroup = new THREE.Group();
   private realGroup = new THREE.Group();
   private anchor = new THREE.Vector3();
-  private startAngle = 0;
+  private viewer = new THREE.Vector3();
+  private floorY: number | null = null;
   private sizeIndex = 0;
   private disposed = false;
   private environment: THREE.WebGLRenderTarget;
@@ -67,26 +86,24 @@ export class Stage {
     return SIZES[this.sizeIndex]!.label;
   }
 
-  private get realLength() {
+  get realLength() {
     return SIZES[this.sizeIndex]!.length ?? this.dino.lengthM;
   }
 
   nextSize() {
     this.sizeIndex = (this.sizeIndex + 1) % SIZES.length;
-    if (this.place === 'real') this.actor?.resize(...this.realPath);
-  }
-
-  /** 현실 모드의 길이, 도는 반지름, 높이 */
-  private get realPath(): [number, number, number] {
-    const L = this.realLength;
-    return this.dino.flies ? [L, L * 1.3, L * 0.8] : [L, L, 0];
+    if (this.place === 'real' && this.placed) {
+      const L = this.realLength;
+      const p = realPath(this.dino, this.anchor, this.viewer, L, this.floorY);
+      this.actor?.resize(p.center, L, p.radius, p.altitude);
+    }
   }
 
   /** 현실 모드: 바닥이나 책상의 한 점에 놓는다. */
-  putAt(point: THREE.Vector3, camera: THREE.Vector3) {
+  putAt(point: THREE.Vector3, camera: THREE.Vector3, floorY: number | null = null) {
     this.anchor.copy(point);
-    // 보는 사람과 가까운 쪽에서 옆모습으로 시작한다.
-    this.startAngle = Math.atan2(camera.z - point.z, camera.x - point.x);
+    this.viewer.copy(camera);
+    this.floorY = floorY;
     this.placed = true;
     this.apply();
   }
@@ -141,10 +158,11 @@ export class Stage {
       // 오른쪽 앞에서 왼쪽으로 지나가며 시작한다.
       actor.place(p.center, this.dino.lengthM, p.radius, Math.PI / 2 - 0.45, p.altitude);
     } else {
-      const [length, radius, altitude] = this.realPath;
+      const L = this.realLength;
+      const p = realPath(this.dino, this.anchor, this.viewer, L, this.floorY);
       this.realGroup.add(actor.group);
       actor.group.visible = this.placed;
-      actor.place(this.anchor, length, radius, this.startAngle, altitude);
+      actor.place(p.center, L, p.radius, p.start, p.altitude);
     }
   }
 

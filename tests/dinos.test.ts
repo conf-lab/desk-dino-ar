@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { eraPath } from '../src/ar/stage';
+import { Vector3 } from 'three';
+import { eraPath, realPath, SIZES } from '../src/ar/stage';
 import { DINOS, modelUrl, searchDinos, soundUrl } from '../src/dinos';
 
 describe('searchDinos', () => {
@@ -41,6 +42,21 @@ describe.each(DINOS)('$ko', (dino) => {
 
   it('뛰기가 걷기보다 빠르다', () => {
     expect(dino.speed.run).toBeGreaterThan(dino.speed.walk);
+  });
+
+  it.each(SIZES)('현실 모드 $label: 보는 사람 앞에서 시작하고 몸이 겹치지 않는다', ({ length }) => {
+    const camera = new Vector3(0.2, 1.4, 0.3);
+    const anchor = new Vector3(0.4, 0.7, -0.5);
+    const L = length ?? dino.lengthM;
+    const p = realPath(dino, anchor, camera, L, 0);
+    const start = new Vector3(p.center.x + p.radius * Math.cos(p.start), p.center.y, p.center.z + p.radius * Math.sin(p.start));
+    const flat = (v: Vector3) => new Vector3(v.x - camera.x, 0, v.z - camera.z);
+    expect(flat(start).normalize().dot(flat(anchor).normalize())).toBeCloseTo(1, 5);
+    expect(flat(start).length()).toBeGreaterThan(L * 0.5 + 0.1);
+    if (L < 0.5) expect(start.distanceTo(anchor)).toBeLessThan(1e-6);
+    expect(start.y).toBeCloseTo(L >= 1 ? 0 : 0.7, 6);
+    // 도는 동안에도 보는 사람보다 가까워지지 않는다.
+    expect(flat(p.center).length() - p.radius).toBeGreaterThanOrEqual(flat(start).length() - 1e-6);
   });
 
   it('공룡 시대의 길이 보는 사람과 겹치지 않는다', () => {

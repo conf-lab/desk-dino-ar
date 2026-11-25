@@ -17,20 +17,40 @@ h2 { font-size: 1.75rem; margin: 0; }
 #search { display: flex; gap: 8px; }
 #q { flex: 1; min-width: 0; font: inherit; padding: 12px 14px; border: 2px solid var(--muted); border-radius: 10px; background: transparent; color: inherit; }
 button { font: inherit; font-weight: 700; padding: 12px 20px; border: 0; border-radius: 10px; background: var(--accent); color: var(--on-accent); cursor: pointer; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-#message { min-height: 1.6em; margin: 12px 0; }
 button:disabled { opacity: 0.6; cursor: wait; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+#list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#list button, #moves button { background: var(--panel); color: var(--ink); padding: 10px 14px; min-height: 44px; }
+#list button[aria-pressed='true'], #moves button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); }
+#message { min-height: 1.6em; margin: 12px 0; }
 #name:focus { outline: none; }
-#stage { margin-top: 12px; }
 #latin { margin: 0 0 12px; color: var(--muted); font-style: italic; }
-model-viewer { width: 100%; height: min(48vh, 420px); background: var(--panel); border-radius: 16px; }
-#ar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); white-space: nowrap; }
+model-viewer { width: 100%; height: min(46vh, 400px); background: var(--panel); border-radius: 16px; }
+#moves { border: 0; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; min-width: 0; }
+#moves button { padding: 10px 4px; }
+#ar { width: 100%; padding: 16px; font-size: 1.125rem; }
 #ar-note { color: var(--muted); font-size: 0.9rem; }
-fieldset { border: 0; padding: 0; margin: 20px 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
-legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
-fieldset label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
-input[type='radio'] { accent-color: var(--accent); width: 20px; height: 20px; }
-dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 16px; }
+dl { display: grid; grid-template-columns: 1.4fr 1fr 0.8fr; gap: 12px; margin: 20px 0 16px; }
 dt { color: var(--muted); font-size: 0.875rem; }
 dd { margin: 0; font-weight: 700; }
+footer { margin-top: 32px; color: var(--muted); font-size: 0.8125rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* AR 화면 위 버튼. 카메라 화면 위에서도 읽히도록 밝기 설정과 상관없이 같은 색을 쓴다. */
+#ar-ui { position: fixed; inset: 0; display: flex; flex-direction: column; pointer-events: none; color: #fff; background: transparent; }
+#ar-ui button { background: rgb(20 26 20 / 0.78); color: #fff; padding: 12px 8px; min-height: 48px; border: 1px solid rgb(255 255 255 / 0.35); }
+.ar-bar { pointer-events: auto; }
+.ar-top { display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; }
+.ar-top strong { flex: 1; text-shadow: 0 1px 4px #000; }
+#ar-ui .ar-top button { padding: 8px 14px; }
+#ar-ui #ar-place { background: #8a3b12; }
+#ar-message { margin: 4px 12px auto; align-self: center; text-align: center; background: rgb(20 26 20 / 0.78); border-radius: 10px; padding: 8px 14px; }
+#ar-message:empty { visibility: hidden; }
+.ar-bottom { padding: 8px 12px max(16px, env(safe-area-inset-bottom)); display: grid; gap: 8px; }
+#ar-tools { display: flex; gap: 8px; justify-content: center; }
+#ar-tools button { padding: 8px 14px; }
+#ar-moves { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+#ar-ui #ar-roar { background: #8a3b12; }
+#ar-safety { position: absolute; inset: auto 16px 30%; padding: 20px; border-radius: 16px; background: rgb(20 26 20 / 0.94); display: grid; gap: 10px; }
+#ar-safety p { margin: 0; }
+#ar-ui #ar-safety-yes { background: #8a3b12; }

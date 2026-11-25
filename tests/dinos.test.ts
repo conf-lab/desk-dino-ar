@@ -1,12 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { DINOS, modelUrl, searchDinos } from '../src/dinos';
+import { eraPath } from '../src/ar/stage';
+import { DINOS, modelUrl, searchDinos, soundUrl } from '../src/dinos';
 
 describe('searchDinos', () => {
-  it.each(['티라노', '티라노사우루스', '티렉스', 'T-Rex', 'TREX', ' t rex ', '사우루스'])('%s: 티라노를 찾는다', (q) => {
-    expect(searchDinos(q)[0]?.id).toBe('trex');
+  it.each([
+    ['티라노', 'trex'],
+    ['T-Rex', 'trex'],
+    [' t rex ', 'trex'],
+    ['트리케라톱스', 'triceratops'],
+    ['브라키오', 'brachiosaurus'],
+    ['목 긴 공룡', 'brachiosaurus'],
+    ['스테고사우루스', 'stegosaurus'],
+    ['익룡', 'pteranodon'],
+    ['프테라노돈', 'pteranodon'],
+  ])('%s: %s', (q, id) => {
+    expect(searchDinos(q)[0]?.id).toBe(id);
   });
 
-  it.each(['', '   ', '!!!', '트리케라톱스', '고양이'])('%j: 결과 없음', (q) => {
+  it.each(['', '   ', '!!!', '고양이'])('%j: 결과 없음', (q) => {
     expect(searchDinos(q)).toEqual([]);
   });
 
@@ -22,13 +33,26 @@ describe('searchDinos', () => {
   });
 });
 
-it('모든 공룡에 장면별 3D 파일이 있고 서로 다르다', () => {
-  for (const { id } of DINOS) {
-    const urls = (['meadow', 'desk', 'real'] as const).map((m) => modelUrl(id, m));
-    expect(new Set(urls).size).toBe(3);
-  }
+describe.each(DINOS)('$ko', (dino) => {
+  it('3D 파일과 소리 파일이 있다', () => {
+    expect(modelUrl(dino.id)).toBeTruthy();
+    expect(soundUrl(dino.id)).toBeTruthy();
+  });
+
+  it('뛰기가 걷기보다 빠르다', () => {
+    expect(dino.speed.run).toBeGreaterThan(dino.speed.walk);
+  });
+
+  it('공룡 시대의 길이 보는 사람과 겹치지 않는다', () => {
+    const p = eraPath(dino);
+    expect(p.center.length() - p.radius - dino.lengthM / 2).toBeGreaterThan(3);
+  });
+});
+
+it('공룡은 다섯 마리이고 id가 겹치지 않는다', () => {
+  expect(new Set(DINOS.map((d) => d.id)).size).toBe(5);
 });
 
 it('없는 모델은 오류로 알린다', () => {
-  expect(() => modelUrl('none', 'desk')).toThrow();
+  expect(() => modelUrl('none')).toThrow();
 });

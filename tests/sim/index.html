@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>AR 장면 시험(개발 서버 전용, 배포되지 않음)</title>
+<style>body { margin: 0; background: repeating-linear-gradient(45deg, #b55, #b55 20px, #c77 20px, #c77 40px); }</style>
+<script type="module">
+  import * as THREE from 'three';
+  import { DINOS } from '/src/dinos.ts';
+  import { Stage } from '/src/ar/stage.ts';
+  const q = new URLSearchParams(location.search);
+  const dino = DINOS.find((d) => d.id === (q.get('id') ?? 'trex'));
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(innerWidth, innerHeight);
+  document.body.append(renderer.domElement);
+  const stage = new Stage(dino, renderer);
+  const cam = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.03, 200);
+  await stage.load();
+  if (q.get('mode') === 'era') {
+    await stage.loadEra();
+    cam.position.set(0, 1.4, 0);
+    stage.enterEra(cam.position, 0, 0);
+  } else {
+    cam.position.set(0, 0.45, 0.75);
+    stage.putAt(new THREE.Vector3(0, 0, 0), cam.position);
+    cam.lookAt(0, 0.05, 0);
+  }
+  window.sim = { stage, cam, THREE, renderer,
+    step(seconds) { for (let t = 0; t < seconds; t += 1 / 30) stage.update(1 / 30, cam.position); renderer.render(stage.scene, cam); },
+    look(yaw, pitch) { cam.rotation.set((pitch * Math.PI) / 180, (yaw * Math.PI) / 180, 0, 'YXZ'); } };
+  document.title = 'ready';
+</script>

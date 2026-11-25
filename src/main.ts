@@ -21,6 +21,17 @@ const arNote = $<HTMLElement>('#ar-note');
 const sizes = $<HTMLFieldSetElement>('#sizes');
 const sizeInputs = document.querySelectorAll<HTMLInputElement>('input[name="size"]');
 
+// 움직임을 줄이도록 설정한 사람에게는 웹 화면에서 자동 재생하지 않는다.
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function applyMotion() {
+  viewer.autoplay = !reducedMotion.matches;
+  if (!viewer.loaded) return;
+  if (reducedMotion.matches) viewer.pause();
+  else viewer.play();
+}
+reducedMotion.addEventListener('change', applyMotion);
+applyMotion();
+
 let current: Dino | null = null;
 let size: SizeMode = 'desk';
 let loading = false;

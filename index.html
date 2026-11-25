@@ -2,12 +2,12 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="공룡 이름을 검색하면 내 책상 위에 3D로 불러옵니다." />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦖</text></svg>" />
     <title>책상 위 공룡</title>
-    <script type="module" crossorigin src="./assets/index-BNy2eSnt.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-D0pW1_Au.css">
+    <script type="module" crossorigin src="./assets/index-CZZ7oP50.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BfWZa7Od.css">
   </head>
   <body>
     <main>
@@ -17,6 +17,7 @@
         <input id="q" type="search" placeholder="공룡 이름 (예: 티라노)" autocomplete="off" enterkeyhint="search" />
         <button type="submit">찾기</button>
       </form>
+      <div id="list" role="group" aria-label="공룡 고르기"></div>
       <p id="message" role="status"></p>
 
       <section id="stage" hidden>
@@ -28,35 +29,70 @@
         <model-viewer
           id="viewer"
           ar
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes="scene-viewer quick-look"
           ar-placement="floor"
           camera-controls
-          camera-orbit="50deg 80deg auto"
           interaction-prompt="none"
           touch-action="pan-y"
           shadow-intensity="1"
           tone-mapping="aces"
         >
-          <button slot="ar-button" id="ar" type="button">내 공간에서 보기</button>
+          <span slot="ar-button"></span>
         </model-viewer>
+
+        <fieldset id="moves">
+          <legend class="sr-only">동작</legend>
+          <button type="button" id="move-idle" aria-pressed="true"></button>
+          <button type="button" id="move-walk" aria-pressed="false"></button>
+          <button type="button" id="move-run" aria-pressed="false"></button>
+          <button type="button" id="move-roar" aria-pressed="false"></button>
+        </fieldset>
+
+        <button type="button" id="ar" hidden>내 공간에서 보기</button>
         <p id="ar-note" hidden>
           이 기기나 브라우저에서는 AR을 쓸 수 없어요. 휴대폰의 Chrome(안드로이드)이나 Safari(아이폰)로 열어 보세요.
         </p>
 
-        <fieldset id="scenes">
-          <legend>장면</legend>
-          <label><input type="radio" name="scene" value="meadow" checked /> 초원에서 뛰놀기 (지름 55cm)</label>
-          <label><input type="radio" name="scene" value="desk" /> 티라노만 (30cm)</label>
-          <label><input type="radio" name="scene" value="real" /> 실제 크기 티라노</label>
-        </fieldset>
-
         <dl>
-          <div><dt>몸길이</dt><dd id="length"></dd></div>
+          <div><dt>크기</dt><dd id="size"></dd></div>
           <div><dt>시대</dt><dd id="period"></dd></div>
           <div><dt>먹이</dt><dd id="diet"></dd></div>
         </dl>
         <p id="fact"></p>
       </section>
+
+      <footer>
+        울음소리는 실제 동물 소리를 바꿔 만든 상상의 소리예요. 원본 녹음: National Park Service(미국 국립공원청).
+        공룡과 배경 그림은 AI로 만들었어요.
+      </footer>
     </main>
+
+    <div id="ar-ui" hidden>
+      <div class="ar-bar ar-top">
+        <strong id="ar-name"></strong>
+        <button type="button" id="ar-place"></button>
+        <button type="button" id="ar-exit">나가기</button>
+      </div>
+      <p id="ar-message" role="status"></p>
+      <div class="ar-bar ar-bottom">
+        <div id="ar-tools" hidden>
+          <button type="button" id="ar-size"></button>
+          <button type="button" id="ar-again">다시 놓기</button>
+        </div>
+        <div id="ar-moves" hidden>
+          <button type="button" id="ar-idle"></button>
+          <button type="button" id="ar-walk"></button>
+          <button type="button" id="ar-run"></button>
+          <button type="button" id="ar-roar"></button>
+        </div>
+      </div>
+      <div class="ar-bar" id="ar-safety" role="alertdialog" aria-modal="true" aria-labelledby="ar-safety-text" hidden>
+        <p id="ar-safety-text">
+          공룡 시대에서는 주변이 보이지 않아요. <b>앉거나 제자리에 서서 폰만 돌려 보세요.</b> 걸어 다니면 다칠 수 있어요.
+        </p>
+        <button type="button" id="ar-safety-yes">알겠어요, 갈래요</button>
+        <button type="button" id="ar-safety-no">안 갈래요</button>
+      </div>
+    </div>
   </body>
 </html>

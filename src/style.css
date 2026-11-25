@@ -1,0 +1,36 @@
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#f3f1ea, #171b18);
+  --panel: light-dark(#e4e1d6, #222822);
+  --ink: light-dark(#20261f, #eceee6);
+  --muted: light-dark(#5a6156, #a6ad9f);
+  --accent: light-dark(#8a3b12, #f0a36f);
+  --on-accent: light-dark(#ffffff, #221308);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.6; word-break: keep-all; }
+main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 1.5rem; margin: 0 0 16px; }
+h2 { font-size: 1.75rem; margin: 0; }
+#search { display: flex; gap: 8px; }
+#q { flex: 1; min-width: 0; font: inherit; padding: 12px 14px; border: 2px solid var(--muted); border-radius: 10px; background: transparent; color: inherit; }
+button { font: inherit; font-weight: 700; padding: 12px 20px; border: 0; border-radius: 10px; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+#message { min-height: 1.6em; margin: 12px 0; }
+button:disabled { opacity: 0.6; cursor: wait; }
+#name:focus { outline: none; }
+#stage { margin-top: 12px; }
+#latin { margin: 0 0 12px; color: var(--muted); font-style: italic; }
+model-viewer { width: 100%; height: min(48vh, 420px); background: var(--panel); border-radius: 16px; }
+#ar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); white-space: nowrap; }
+#ar-note { color: var(--muted); font-size: 0.9rem; }
+fieldset { border: 0; padding: 0; margin: 20px 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
+fieldset label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+input[type='radio'] { accent-color: var(--accent); width: 20px; height: 20px; }
+dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 16px; }
+dt { color: var(--muted); font-size: 0.875rem; }
+dd { margin: 0; font-weight: 700; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
